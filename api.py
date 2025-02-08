@@ -1,9 +1,9 @@
 from flask import Flask, jsonify
-from flask_cors import CORS  # ✅ Import CORS untuk menangani masalah akses lintas domain
+from flask_cors import CORS
 import requests
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "https://ngopi-bro.web.app"}})  # 🔥 Izinkan akses dari Firebase website
+CORS(app, resources={r"/*": {"origins": "https://ngopi-bro.web.app"}})
 
 # 🔹 API Bank (Validasi Rekening)
 API_BANK_URL = "https://cek-nomor-rekening-bank-indonesia1.p.rapidapi.com/cekRekening"
@@ -28,23 +28,33 @@ def cek_rekening(kode_bank, nomor_rekening):
         data = response.json()
 
         if response.status_code == 200 and "data" in data and "nama" in data["data"]:
-            return jsonify({"success": True, "nama_pemilik": data["data"]["nama"], "kode_bank": kode_bank, "nomor_rekening": nomor_rekening})
+            return jsonify({
+                "success": True,
+                "nama_pemilik": data["data"]["nama"],
+                "kode_bank": kode_bank,
+                "nomor_rekening": nomor_rekening
+            })
         else:
             return jsonify({"success": False, "message": "Rekening tidak ditemukan"}), 404
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-# ✅ Endpoint untuk Cek E-Wallet
+# ✅ Endpoint untuk Cek E-Wallet (DIPERBAIKI)
 @app.route("/cek_ewallet/<nomor_hp>/<ewallet>", methods=["GET"])
 def cek_ewallet(nomor_hp, ewallet):
     try:
-        endpoint = f"/cek_ewallet/{nomor_hp}/{ewallet}"
-        response = requests.get(API_EWALLET_URL + endpoint, headers=API_EWALLET_HEADERS)
+        url = f"{API_EWALLET_URL}/cek_ewallet/{nomor_hp}/{ewallet}"
+        response = requests.get(url, headers=API_EWALLET_HEADERS)
         data = response.json()
 
         if response.status_code == 200 and "data" in data:
-            return jsonify({"success": True, "nama_pemilik": data["data"]["name"], "ewallet": ewallet, "nomor_hp": nomor_hp})
+            return jsonify({
+                "success": True,
+                "nama_pemilik": data["data"]["name"],
+                "ewallet": ewallet,
+                "nomor_hp": nomor_hp
+            })
         else:
             return jsonify({"success": False, "message": "E-Wallet tidak ditemukan"}), 404
 
