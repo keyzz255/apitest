@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 import requests
 
 app = Flask(__name__)
@@ -17,37 +17,31 @@ API_EWALLET_HEADERS = {
     "x-rapidapi-host": "check-id-ovo-gopay-shopee-linkaja-dana.p.rapidapi.com"
 }
 
-# 🔹 Endpoint untuk mengecek rekening bank
-@app.route("/cek-rekening", methods=["GET"])
-def cek_rekening():
-    kode_bank = request.args.get("kodeBank")
-    nomor_rekening = request.args.get("noRekening")
+@app.route("/")
+def home():
+    return "API is running!", 200
 
-    if not kode_bank or not nomor_rekening:
-        return jsonify({"error": "Kode bank dan nomor rekening harus diisi"}), 400
+@app.route("/cek_rekening/<kode_bank>/<no_rekening>")
+def cek_rekening(kode_bank, no_rekening):
+    """🔹 Endpoint untuk cek rekening bank"""
+    params = {"kodeBank": kode_bank, "noRekening": no_rekening}
+    try:
+        response = requests.get(API_BANK_URL, headers=API_BANK_HEADERS, params=params)
+        data = response.json()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    response = requests.get(API_BANK_URL, headers=API_BANK_HEADERS, params={
-        "kodeBank": kode_bank,
-        "noRekening": nomor_rekening
-    })
+@app.route("/cek_ewallet/<ewallet>/<nomor>")
+def cek_ewallet(ewallet, nomor):
+    """🔹 Endpoint untuk cek e-Wallet"""
+    endpoint = f"/cek_ewallet/{nomor}/{ewallet}"
+    try:
+        response = requests.get(API_EWALLET_URL + endpoint, headers=API_EWALLET_HEADERS)
+        data = response.json()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    return jsonify(response.json()), response.status_code
-
-# 🔹 Endpoint untuk mengecek e-wallet
-@app.route("/cek-ewallet", methods=["GET"])
-def cek_ewallet():
-    nomor_hp = request.args.get("nomorHP")
-    ewallet = request.args.get("ewallet")
-
-    if not nomor_hp or not ewallet:
-        return jsonify({"error": "Nomor HP dan e-wallet harus diisi"}), 400
-
-    response = requests.get(f"{API_EWALLET_URL}/cek_ewallet/{nomor_hp}/{ewallet}", headers=API_EWALLET_HEADERS)
-
-    return jsonify(response.json()), response.status_code
-
-# 🔹 Menjalankan server Flask
 if __name__ == "__main__":
-    from os import environ
-    port = int(environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=5000)
