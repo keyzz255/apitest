@@ -19,6 +19,34 @@ API_EWALLET_HEADERS = {
     "x-rapidapi-host": "check-id-ovo-gopay-shopee-linkaja-dana.p.rapidapi.com"
 }
 
+# ✅ Daftar Kode Bank
+KODE_BANKS = {
+    "bca": "014",
+    "mandiri": "008",
+    "bni": "009",
+    "bri": "002",
+    "cimb": "022",
+    "danamon": "011",
+    "maybank": "016",
+    "permata": "013",
+    "panin": "019",
+    "btn": "200",
+    "mega": "426",
+    "bsi": "451",
+    "btpn": "213",
+    "jenius": "213",
+    "ocbc": "028",
+    "dbs": "046",
+    "uob": "023",
+    "hsbc": "041",
+    "citibank": "031",
+    "standard": "050",
+    "muamalat": "147",
+    "seabank": "535",
+    "blu": "88888",
+    "sakuku": "99000"
+}
+
 # ✅ Endpoint untuk Cek Rekening Bank
 @app.route("/cek_rekening/<kode_bank>/<nomor_rekening>", methods=["GET"])
 def cek_rekening(kode_bank, nomor_rekening):
@@ -60,6 +88,11 @@ def cek_ewallet(nomor_hp, ewallet):
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+# ✅ Endpoint untuk Mendapatkan Daftar Kode Bank
+@app.route("/list_banks", methods=["GET"])
+def list_banks():
+    return jsonify({"success": True, "banks": KODE_BANKS})
 
 # ✅ Endpoint Home
 @app.route("/")
